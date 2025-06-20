@@ -1,40 +1,57 @@
 {
-  "name": "postcss-px-to-viewport",
-  "description": "A CSS post-processor that converts px to viewport units (vw, vh, vmin, vmax).",
-  "version": "1.1.1",
-  "author": "CC <hcprecog@gmail.com>",
-  "license": "MIT",
+  "name": "postcss-px-convert",
+  "version": "1.0.0",
+  "description": "一个支持 px 转 rem 或 vw 的 PostCSS 插件和 Node 工具，适用于 CSS、JS、Vue、React 等多场景。",
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  },
   "repository": {
     "type": "git",
-    "url": "git@github.com:chao921125/postcss-pxtovw.git"
+    "url": "https://github.com/chao921125/postcss-px-convert.git"
   },
-  "bugs": "https://github.com/chao921125/postcss-pxtovw/issues",
-  "homepage": "https://github.com/chao921125/postcss-pxtovw",
-  "main": "index.js",
-  "keywords": [
-    "css",
-    "units",
-    "pixel",
-    "px",
-    "viewport",
-    "vw",
-    "vh",
-    "vmin",
-    "vmax",
-    "postcss",
-    "postcss-plugin"
-  ],
+  "bugs": {
+    "url": "https://github.com/chao921125/postcss-px-convert/issues"
+  },
+  "homepage": "https://github.com/chao921125/postcss-px-convert#readme",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
-    "test": "jest spec/*.spec.js"
+    "test": "jest",
+    "test:watch": "jest --watchAll"
   },
-  "dependencies": {
-    "object-assign": "^4.1.1"
-  },
+  "keywords": [
+    "postcss",
+    "px",
+    "rem",
+    "vw",
+    "css",
+    "responsive",
+    "vue",
+    "react",
+    "convert"
+  ],
+  "author": "你的名字 <your@email.com>",
+  "license": "MIT",
   "devDependencies": {
-    "jest": "^25.5.4",
-    "postcss": "^8.4.41"
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.2",
+    "postcss": "^8.5.6",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3"
   },
-  "peerDependencies": {
-    "postcss": ">=5.0.2"
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/test/**/*.test.ts"]
   }
 }
