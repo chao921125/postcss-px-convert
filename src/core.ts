@@ -76,7 +76,7 @@ export function px2any(css: string, userOptions: Px2AnyOptions): string {
   const pxReplaceLandscape = options.landscape ? createPxReplace(options, true) : null;
   // 注释忽略实现
   const ignoreComment = options.ignoreComment || 'no';
-  const ignoreReg = new RegExp(`/\\*+\\s*pxremvw-ignore\\s*\\*+/`);
+  const ignoreReg = /\/\*\s*px-convert-ignore\s*\*\//;
   let lines = css.split(/(?<=;|\{|\})/);
   let skip = false;
   lines = lines.map(line => {

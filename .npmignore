@@ -1,6 +1,10 @@
-.idea
+test/
+node_modules/
+*.log
+*.tsbuildinfo
+*.swp
+coverage/
+.git
 .gitignore
-npm-debug.log*
-node_modules
-spec
-package-lock.json
+.vscode
+.env 

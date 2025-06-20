@@ -58,7 +58,7 @@ describe('px2any 基础功能', () => {
   });
 
   it('ignoreComment 忽略注释下一行 px 转换', () => {
-    const css = '/* pxremvw-ignore */\np { font-size: 20px; }\nh1 { font-size: 32px; }';
+    const css = '/* px-convert-ignore */\np { font-size: 20px; }\nh1 { font-size: 32px; }';
     const result = px2any(css, { unitToConvert: 'rem', rootValue: 16 });
     expect(result).toContain('p { font-size: 20px; }'); // 被忽略
     expect(result).toContain('h1 { font-size: 2.00000rem; }'); // 被转换
