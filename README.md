@@ -61,7 +61,7 @@ export default {
 			grid: false,
 		},
 		"postcss-px-convert": {
-            unitToConvert: 'rem',
+      unitToConvert: 'rem',
 			rootValue: 78,
 			unitPrecision: 5,
 			propList: ["*"],
@@ -70,7 +70,7 @@ export default {
 			mediaQuery: false,
 			minPixelValue: 0,
 			exclude: /node_modules/i,
-            injectFlexibleScript: true,
+      injectFlexibleScript: true,
 		},
 	},
 };
