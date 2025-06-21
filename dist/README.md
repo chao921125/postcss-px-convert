@@ -173,18 +173,18 @@ body {
 
 ## 🔧 配置选项
 
-| 选项 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `unitToConvert` | `'rem' \| 'vw'` | `'rem'` | 转换目标单位 |
-| `rootValue` | `number` | `16` | rem 基准值 |
-| `viewportWidth` | `number` | `375` | vw 基准宽度 |
-| `unitPrecision` | `number` | `5` | 单位精度 |
-| `minPixelValue` | `number` | `1` | 最小转换数值 |
-| `selectorBlackList` | `(string \| RegExp)[]` | `[]` | 选择器黑名单 |
-| `propList` | `string[]` | `['*']` | 属性过滤列表 |
-| `mediaQuery` | `boolean` | `false` | 是否转换媒体查询 |
-| `landscape` | `boolean` | `false` | 是否启用横屏适配 |
-| `injectFlexibleScript` | `boolean` | `false` | 是否生成 flexible.js |
+| 选项                     | 类型                     | 默认值     | 说明               |
+|------------------------|------------------------|---------|------------------|
+| `unitToConvert`        | `'rem' \| 'vw'`        | `'rem'` | 转换目标单位           |
+| `rootValue`            | `number`               | `16`    | rem 基准值          |
+| `viewportWidth`        | `number`               | `375`   | vw 基准宽度          |
+| `unitPrecision`        | `number`               | `5`     | 单位精度             |
+| `minPixelValue`        | `number`               | `1`     | 最小转换数值           |
+| `selectorBlackList`    | `(string \| RegExp)[]` | `[]`    | 选择器黑名单           |
+| `propList`             | `string[]`             | `['*']` | 属性过滤列表           |
+| `mediaQuery`           | `boolean`              | `false` | 是否转换媒体查询         |
+| `landscape`            | `boolean`              | `false` | 是否启用横屏适配         |
+| `injectFlexibleScript` | `boolean`              | `false` | 是否生成 flexible.js |
 
 更多配置选项请查看 [配置说明](./docs/configuration.md)。
 
@@ -275,25 +275,6 @@ npm test
 ```bash
 npm run test:watch
 ```
-
-## 📝 更新日志
-
-### v1.0.9
-- ✨ 新增项目重构，提升代码可维护性
-- 📦 支持 dist 目录打包
-- 📚 完善文档结构
-- 🔧 优化工具方法抽取
-- 🎯 增强可扩展性
-
-### v1.0.8
-- ✨ 新增 Vite 插件支持
-- 🔧 优化 flexible.js 生成逻辑
-- 📚 完善使用文档
-
-### v1.0.7
-- ✨ 新增自动生成 flexible.js 功能
-- 🔧 修复正则表达式问题
-- 📚 更新 README 文档
 
 ## 🤝 贡献
 
