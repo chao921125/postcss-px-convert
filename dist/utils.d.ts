@@ -37,4 +37,4 @@ export declare function isFileIncluded(filepath: string, include: (string | RegE
  * @returns 替换函数
  */
 export declare function createPxReplace(options: any, isLandscape?: boolean): (m: string, $1: string) => any;
-//# sourceMappingURL=index.d.ts.map
+//# sourceMappingURL=utils.d.ts.map

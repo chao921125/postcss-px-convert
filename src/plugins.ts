@@ -1,9 +1,10 @@
 /**
- * Flexible.js 脚本生成器
+ * 插件集合
  */
 
 import fs from 'fs';
 import path from 'path';
+import { ViteFlexibleInjectOptions } from './types';
 
 // flexible 脚本内容
 const FLEXIBLE_SCRIPT = `
@@ -37,4 +38,24 @@ export function generateFlexibleScript(outPath?: string): boolean {
     console.error('[postcss-px-convert] 生成 flexible.js 失败:', error);
     return false;
   }
+}
+
+/**
+ * Vite 插件：自动注入 flexible.js
+ * @param options 插件配置
+ * @returns Vite 插件
+ */
+export function viteFlexibleInject(options: ViteFlexibleInjectOptions = {}) {
+  const scriptPath = options.flexibleScriptPath || '/flexible.js';
+  
+  return {
+    name: 'vite-flexible-inject',
+    transformIndexHtml(html: string) {
+      // 插入到 <head> 末尾
+      return html.replace(
+        /(<head[^>]*>)/i,
+        `$1\n<script src="${scriptPath}"></script>`
+      );
+    }
+  };
 } 

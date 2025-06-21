@@ -1,8 +1,8 @@
 /**
- * 工具方法测试
+ * 工具函数测试
  */
 
-import { toFixed, isSelectorBlacklisted, isPropIncluded, isFileIncluded, createPxReplace } from '../utils';
+import { toFixed, isSelectorBlacklisted, isPropIncluded, isFileIncluded, createPxReplace } from '../src/utils';
 
 describe('toFixed', () => {
   test('基础四舍五入', () => {

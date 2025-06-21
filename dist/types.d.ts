@@ -1,6 +1,3 @@
-/**
- * 类型定义
- */
 export type UnitToConvert = 'rem' | 'vw';
 export interface Px2AnyOptions {
     unitToConvert: UnitToConvert;
@@ -24,4 +21,4 @@ export interface Px2AnyOptions {
 export interface ViteFlexibleInjectOptions {
     flexibleScriptPath?: string;
 }
-//# sourceMappingURL=index.d.ts.map
+//# sourceMappingURL=types.d.ts.map

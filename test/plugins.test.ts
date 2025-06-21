@@ -2,8 +2,7 @@
  * 插件功能测试
  */
 
-import { viteFlexibleInject } from '../plugins/viteFlexibleInject';
-import { generateFlexibleScript } from '../plugins/flexibleScript';
+import { viteFlexibleInject, generateFlexibleScript } from '../src/plugins';
 import fs from 'fs';
 import path from 'path';
 

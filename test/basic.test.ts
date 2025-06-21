@@ -1,4 +1,4 @@
-import { px2any } from '../dist/core';
+import { px2any } from '../src/core';
 
 describe('px2any 基础功能', () => {
   it('px 转 rem', () => {
@@ -43,7 +43,7 @@ describe('px2any 基础功能', () => {
       },
       walkAtRules: () => {}
     };
-    const { px2anyPostcss } = require('../dist/core');
+    const { px2anyPostcss } = require('../src/core');
     px2anyPostcss(fakeRoot, { unitToConvert: 'rem', rootValue: 20, selectorBlackList: ['.ignore'] });
     // .ignore 不变，.ok 被转换
     // 这里只能手动断言
@@ -66,7 +66,7 @@ describe('px2any 基础功能', () => {
 
   it('mediaQuery 支持媒体查询 px 转换', () => {
     const postcss = require('postcss');
-    const plugin = require('../dist/index').default;
+    const plugin = require('../index').default;
     const css = '@media (max-width: 375px) { .a { font-size: 20px; } }';
     return postcss([plugin({ unitToConvert: 'vw', viewportWidth: 375, mediaQuery: true })])
       .process(css, { from: undefined })
@@ -89,7 +89,7 @@ describe('px2any 基础功能', () => {
   });
 
   it('isFileIncluded include/exclude 文件路径过滤', () => {
-    const { isFileIncluded } = require('../dist/utils');
+    const { isFileIncluded } = require('../src/utils');
     expect(isFileIncluded('src/a.js', ['src'], [])).toBe(true);
     expect(isFileIncluded('src/a.js', [], ['src'])).toBe(false);
     expect(isFileIncluded('src/a.js', [/src/], [])).toBe(true);

@@ -1,7 +1,7 @@
 /**
  * 核心转换逻辑
  */
-import { Px2AnyOptions } from '../types';
+import { Px2AnyOptions } from './types';
 /**
  * 将 CSS 中的 px 转换为 rem 或 vw
  * @param css CSS 字符串
@@ -15,4 +15,5 @@ export declare function px2any(css: string, userOptions: Px2AnyOptions): string;
  * @param options 配置选项
  */
 export declare function px2anyPostcss(root: any, options: Px2AnyOptions): void;
-//# sourceMappingURL=index.d.ts.map
+export declare function isFileIncluded(filepath: string, include: (string | RegExp)[], exclude: (string | RegExp)[]): boolean;
+//# sourceMappingURL=core.d.ts.map

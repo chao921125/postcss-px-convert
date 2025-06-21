@@ -5,7 +5,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.px2any = px2any;
 exports.px2anyPostcss = px2anyPostcss;
-const utils_1 = require("../utils");
+exports.isFileIncluded = isFileIncluded;
+const utils_1 = require("./utils");
 const defaultOptions = {
     unitToConvert: 'rem',
     rootValue: 16,
@@ -95,4 +96,13 @@ function px2anyPostcss(root, options) {
         });
     }
 }
-//# sourceMappingURL=index.js.map
+function isFileIncluded(filepath, include, exclude) {
+    if (exclude && exclude.some((item) => (typeof item === 'string' ? filepath.includes(item) : item.test(filepath)))) {
+        return false;
+    }
+    if (include && include.length > 0) {
+        return include.some((item) => (typeof item === 'string' ? filepath.includes(item) : item.test(filepath)));
+    }
+    return true;
+}
+//# sourceMappingURL=core.js.map

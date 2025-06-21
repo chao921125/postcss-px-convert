@@ -2,8 +2,8 @@
  * 核心功能测试
  */
 
-import { px2any, px2anyPostcss } from '../core';
-import { Px2AnyOptions } from '../types';
+import { px2any, px2anyPostcss } from '../src/core';
+import { Px2AnyOptions } from '../src/types';
 
 describe('px2any', () => {
   const defaultOptions: Px2AnyOptions = {

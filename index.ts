@@ -3,10 +3,9 @@
  * 一个支持 px 转 rem 或 vw 的 PostCSS 插件和 Node 工具
  */
 
-import { px2any, px2anyPostcss } from './core';
-import { Px2AnyOptions } from './types';
-import { viteFlexibleInject } from './plugins/viteFlexibleInject';
-import { generateFlexibleScript } from './plugins/flexibleScript';
+import { px2any, px2anyPostcss } from './src/core';
+import { Px2AnyOptions } from './src/types';
+import { viteFlexibleInject, generateFlexibleScript } from './src/plugins';
 
 /**
  * PostCSS 插件工厂函数

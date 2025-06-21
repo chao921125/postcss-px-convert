@@ -1,12 +1,13 @@
 "use strict";
 /**
- * Flexible.js 脚本生成器
+ * 插件集合
  */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateFlexibleScript = generateFlexibleScript;
+exports.viteFlexibleInject = viteFlexibleInject;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 // flexible 脚本内容
@@ -41,4 +42,19 @@ function generateFlexibleScript(outPath) {
         return false;
     }
 }
-//# sourceMappingURL=flexibleScript.js.map
+/**
+ * Vite 插件：自动注入 flexible.js
+ * @param options 插件配置
+ * @returns Vite 插件
+ */
+function viteFlexibleInject(options = {}) {
+    const scriptPath = options.flexibleScriptPath || '/flexible.js';
+    return {
+        name: 'vite-flexible-inject',
+        transformIndexHtml(html) {
+            // 插入到 <head> 末尾
+            return html.replace(/(<head[^>]*>)/i, `$1\n<script src="${scriptPath}"></script>`);
+        }
+    };
+}
+//# sourceMappingURL=plugins.js.map

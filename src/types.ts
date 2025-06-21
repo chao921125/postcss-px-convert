@@ -16,4 +16,10 @@ export interface Px2AnyOptions {
   landscapeWidth?: number;      // 横屏基准宽度
   ignoreComment?: string;       // 忽略注释，默认 'no'
   customPxReplace?: (px: number, converted: string, unit: UnitToConvert) => string; // 自定义转换函数
+  injectFlexibleScript?: boolean; // 是否自动生成 flexible.js
+  flexibleScriptPath?: string;  // flexible.js 输出路径
+}
+
+export interface ViteFlexibleInjectOptions {
+  flexibleScriptPath?: string;
 }

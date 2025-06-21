@@ -1,6 +1,6 @@
 {
   "name": "postcss-px-convert",
-  "version": "1.1.2",
+  "version": "1.1.5",
   "description": "一个支持 px 转 rem 或 vw 的 PostCSS 插件和 Node 工具，适用于 CSS、JS、Vue、React 等多场景。",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

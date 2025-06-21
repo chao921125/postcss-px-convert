@@ -1,4 +1,9 @@
-import { Px2AnyOptions, UnitToConvert } from './types';
+/**
+ * 核心转换逻辑
+ */
+
+import { Px2AnyOptions } from './types';
+import { createPxReplace, isSelectorBlacklisted, isPropIncluded } from './utils';
 
 const defaultOptions: Required<Px2AnyOptions> = {
   unitToConvert: 'rem',
@@ -16,69 +21,40 @@ const defaultOptions: Required<Px2AnyOptions> = {
   landscapeWidth: 568,
   ignoreComment: 'no',
   customPxReplace: (px, converted, unit) => converted,
+  injectFlexibleScript: false,
+  flexibleScriptPath: '',
 };
 
-function createPxReplace(options: Required<Px2AnyOptions>, isLandscape = false) {
-  return function (m: string, $1: string) {
-    if (!$1) return m;
-    const px = parseFloat($1);
-    if (px <= options.minPixelValue) return m;
-    let unit = isLandscape ? options.landscapeUnit : options.unitToConvert;
-    let converted: number;
-    if (unit === 'rem') {
-      converted = px / options.rootValue;
-    } else if (unit === 'vw') {
-      const width = isLandscape ? options.landscapeWidth : options.viewportWidth;
-      converted = px / width * 100;
-    } else {
-      return m;
-    }
-    let value = toFixed(converted, options.unitPrecision);
-    let result = `${value}${unit}`;
-    if (options.customPxReplace) {
-      return options.customPxReplace(px, result, unit);
-    }
-    return result;
-  };
-}
-
-function toFixed(num: number, precision: number) {
-  // 严格四舍五入
-  return (Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision)).toFixed(precision);
-}
-
-function isSelectorBlacklisted(selector: string, blackList: (string | RegExp)[]): boolean {
-  return blackList.some((item) => {
-    if (typeof item === 'string') {
-      return selector.includes(item);
-    } else {
-      return item.test(selector);
-    }
-  });
-}
-
-function isPropIncluded(prop: string, propList: string[]): boolean {
-  if (propList.includes('*')) return true;
-  return propList.some((item) => {
-    if (item.endsWith('*')) {
-      return prop.startsWith(item.slice(0, -1));
-    } else if (item.startsWith('*')) {
-      return prop.endsWith(item.slice(1));
-    } else {
-      return prop === item;
-    }
-  });
-}
-
+/**
+ * 将 CSS 中的 px 转换为 rem 或 vw
+ * @param css CSS 字符串
+ * @param userOptions 用户配置
+ * @returns 转换后的 CSS 字符串
+ */
 export function px2any(css: string, userOptions: Px2AnyOptions): string {
   const options = { ...defaultOptions, ...userOptions } as Required<Px2AnyOptions>;
-  const pxReplace = createPxReplace(options, options.landscape);
+  const pxReplace = createPxReplace(options, false); // 主样式始终用 unitToConvert
   const pxReplaceLandscape = options.landscape ? createPxReplace(options, true) : null;
+  
   // 注释忽略实现
   const ignoreComment = options.ignoreComment || 'no';
   const ignoreReg = /\/\*\s*px-convert-ignore\s*\*\//;
+  
+  // 横屏适配：先处理 @media (orientation: landscape) 块
+  if (pxReplaceLandscape && options.landscape) {
+    css = css.replace(/@media\s*\([^)]*orientation:\s*landscape[^)]*\)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g, (match, content) => {
+      return match.replace(content, px2any(content, {
+        ...defaultOptions,
+        unitToConvert: options.landscapeUnit,
+        viewportWidth: options.landscapeWidth,
+        landscape: false, // 递归时强制关闭横屏标志
+      }));
+    });
+  }
+  
   let lines = css.split(/(?<=;|\{|\})/);
   let skip = false;
+  
   lines = lines.map(line => {
     if (ignoreReg.test(line)) {
       skip = true;
@@ -88,18 +64,7 @@ export function px2any(css: string, userOptions: Px2AnyOptions): string {
       skip = false;
       return line;
     }
-    // 横屏适配：递归处理 @media (orientation: landscape) 内内容
-    if (pxReplaceLandscape && /@media[^{]*orientation:\s*landscape/.test(line)) {
-      return line.replace(/\{([^{}]*)\}/g, (block, content) => {
-        return '{' + px2any(content, {
-          ...defaultOptions,
-          ...options,
-          unitToConvert: options.landscapeUnit,
-          viewportWidth: options.landscapeWidth,
-          landscape: false,
-        }) + '}';
-      });
-    }
+    
     // propList 只转换指定属性
     if (options.propList && options.propList.length && !options.propList.includes('*')) {
       // 只处理 propList 中的属性
@@ -110,12 +75,18 @@ export function px2any(css: string, userOptions: Px2AnyOptions): string {
         return m;
       });
     }
+    
     return line.replace(/(\d*\.?\d+)px/g, pxReplace);
   });
+  
   return lines.join('');
 }
 
-// postcss 处理用
+/**
+ * PostCSS 插件处理函数
+ * @param root PostCSS 根节点
+ * @param options 配置选项
+ */
 export function px2anyPostcss(root: any, options: Px2AnyOptions) {
   root.walkRules((rule: any) => {
     if (isSelectorBlacklisted(rule.selector, options.selectorBlackList || [])) return;
@@ -124,6 +95,7 @@ export function px2anyPostcss(root: any, options: Px2AnyOptions) {
       decl.value = px2any(decl.value, options);
     });
   });
+  
   if (options.mediaQuery) {
     root.walkAtRules('media', (rule: any) => {
       rule.params = px2any(rule.params, options);
