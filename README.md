@@ -23,6 +23,12 @@
 npm install postcss-px-convert --save-dev
 ```
 
+或者使用 pnpm：
+
+```bash
+pnpm add postcss-px-convert --save-dev
+```
+
 或者使用 yarn：
 
 ```bash
