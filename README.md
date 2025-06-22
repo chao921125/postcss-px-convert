@@ -6,6 +6,8 @@
 
 一个功能强大的 PostCSS 插件和 Node.js 工具，支持将 CSS 中的 px 单位转换为 rem 或 vw，适用于移动端响应式开发。
 
+[English Documentation](./README.en.md)
+
 ## ✨ 特性
 
 - 🚀 **高性能**: 基于 PostCSS 生态，转换速度快
@@ -39,20 +41,74 @@ yarn add postcss-px-convert --dev
 
 ### 基础用法
 
+#### rem 配置示例
+
 ```js
 // postcss.config.js
 module.exports = {
   plugins: {
     'postcss-px-convert': {
       unitToConvert: 'rem',
-      rootValue: 37.5,
+      rootValue: 37.5,      // 设计稿宽度的 1/10，375px 设计稿对应 37.5，750px 设计稿对应 75
       unitPrecision: 5,
+      propList: ['*'],      // 所有属性都转换
+      selectorBlackList: [], // 不需要转换的选择器
+      replace: true,        // 转换后是否移除原来的 px
+      mediaQuery: false,    // 媒体查询内的 px 是否转换
+      minPixelValue: 1      // 小于等于 1px 的不转换
+    }
+  }
+}
+```
+
+#### vw 配置示例
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    'postcss-px-convert': {
+      unitToConvert: 'vw',
+      viewportWidth: 375,  // 设计稿宽度
+      unitPrecision: 5,
+      propList: ['*'],
+      selectorBlackList: [],
+      replace: true,
+      mediaQuery: false,
       minPixelValue: 1
     }
   }
 }
+```
 
-// https://postcss.org/
+### 独立配置文件方式
+
+```js
+// .postcssrc.js 或 postcss.config.js
+module.exports = {
+  plugins: {
+    autoprefixer: {
+      overrideBrowserslist: ["Android >= 4.1", "iOS >= 7.1", "Chrome > 31", "ff > 31", "ie >= 8"]
+    },
+    'postcss-px-convert': {
+      unitToConvert: 'rem',
+      rootValue: 37.5,
+      unitPrecision: 5,
+      propList: ["*"],
+      selectorBlackList: ["ignore"],
+      replace: true,
+      mediaQuery: false,
+      minPixelValue: 0,
+      exclude: /node_modules/i
+    }
+  }
+}
+```
+
+### Vite 项目
+
+```js
+// .postcssrc.js
 export default {
 	plugins: {
 		autoprefixer: {
@@ -61,7 +117,7 @@ export default {
 			grid: false,
 		},
 		"postcss-px-convert": {
-            unitToConvert: 'rem',
+      unitToConvert: 'rem',
 			rootValue: 78,
 			unitPrecision: 5,
 			propList: ["*"],
@@ -70,19 +126,18 @@ export default {
 			mediaQuery: false,
 			minPixelValue: 0,
 			exclude: /node_modules/i,
-            injectFlexibleScript: true,
+      injectFlexibleScript: true,
 		},
 	},
 };
 
 ```
 
-### Vite 项目
-
 ```js
 // vite.config.js
 import { defineConfig } from 'vite';
 import postcssPxConvert from 'postcss-px-convert';
+// rem 适配时，自动生成并引入 flexible.js
 import { viteFlexibleInject } from 'postcss-px-convert';
 
 export default defineConfig({
@@ -105,9 +160,10 @@ export default defineConfig({
 
 ## 📖 文档
 
-- [API 文档](./docs/api.md) - 详细的 API 参考
-- [配置说明](./docs/configuration.md) - 完整的配置选项说明
-- [使用示例](./docs/examples.md) - 丰富的使用示例
+- [API 文档](./docs/api.md) - 详细的 API 参考 | [English](./docs/api.en.md)
+- [配置说明](./docs/configuration.md) - 完整的配置选项说明 | [English](./docs/configuration.en.md)
+- [使用示例](./docs/examples.md) - 丰富的使用示例 | [English](./docs/examples.en.md)
+- [贡献指南](./docs/CONTRIBUTING.md) - 参与项目贡献 | [English](./docs/CONTRIBUTING.en.md)
 
 ## 🎯 主要功能
 
@@ -208,6 +264,24 @@ body {
 }
 ```
 
+#### 动态设置 rootValue
+
+当项目中有多个设计稿尺寸（如主项目是 750px，而某些第三方组件是基于 375px 设计）时，可以动态设置 rootValue：
+
+```js
+{
+  unitToConvert: 'rem',
+  rootValue: ({ file }) => {
+    // 如果是 vant 组件，使用 37.5 作为基准值
+    if (file.indexOf('node_modules/vant') !== -1) {
+      return 37.5;
+    }
+    // 其他使用 75 作为基准值
+    return 75;
+  }
+}
+```
+
 ### vw 方案
 
 直接使用设计稿宽度：
@@ -223,73 +297,3 @@ body {
 ## 🔌 插件支持
 
 ### PostCSS 插件
-
-```js
-// 对象写法
-{
-  plugins: {
-    'postcss-px-convert': options
-  }
-}
-
-// 函数写法
-{
-  plugins: [
-    postcssPxConvert(options)
-  ]
-}
-```
-
-### Vite 插件
-
-```js
-import { viteFlexibleInject } from 'postcss-px-convert';
-
-export default {
-  plugins: [
-    viteFlexibleInject({ flexibleScriptPath: '/flexible.js' })
-  ]
-}
-```
-
-## 🛠️ Node.js API
-
-```js
-const { px2any } = require('postcss-px-convert');
-
-const css = 'body { font-size: 32px; }';
-const result = px2any(css, {
-  unitToConvert: 'rem',
-  rootValue: 37.5
-});
-```
-
-## 🧪 测试
-
-```bash
-npm test
-```
-
-运行测试用例：
-
-```bash
-npm run test:watch
-```
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 🔗 相关链接
-
-- [PostCSS](https://postcss.org/)
-- [Vite](https://vitejs.dev/)
-- [amfe-flexible](https://github.com/amfe/lib-flexible)
-
----
-
-如果这个项目对你有帮助，请给个 ⭐️ 支持一下！ 
