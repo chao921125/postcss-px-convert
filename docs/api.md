@@ -1,10 +1,10 @@
 # API 文档
 
-## 核心 API
+## 核心函数
 
 ### px2any(css, options)
 
-将 CSS 字符串中的 px 转换为 rem 或 vw。
+将 CSS 字符串中的 px 单位转换为 rem 或 vw。
 
 **参数：**
 - `css` (string): 要转换的 CSS 字符串
@@ -14,26 +14,40 @@
 - `string`: 转换后的 CSS 字符串
 
 **示例：**
-```ts
+```javascript
 import { px2any } from 'postcss-px-convert';
 
-const css = 'body { font-size: 32px; margin: 8px 16px; }';
-const result = px2any(css, { 
-  unitToConvert: 'rem', 
-  rootValue: 16 
+const css = 'body { font-size: 32px; }';
+const result = px2any(css, {
+  unitToConvert: 'rem',
+  rootValue: 16
 });
-// 输出: body { font-size: 2.00000rem; margin: 0.50000rem 1.00000rem; }
+// 结果: 'body { font-size: 2.00000rem; }'
 ```
 
-### px2anyPostcss(root, options)
+### px2anyValue(value, options)
 
-PostCSS 插件处理函数。
+将单个 px 值转换为 rem 或 vw。
 
 **参数：**
-- `root` (PostCSS Root): PostCSS 根节点
+- `value` (string): 要转换的单个值（如 "32px"）
 - `options` (Px2AnyOptions): 转换配置选项
 
-## 插件 API
+**返回值：**
+- `string`: 转换后的值
+
+**示例：**
+```javascript
+import { px2anyValue } from 'postcss-px-convert';
+
+const result = px2anyValue('32px', {
+  unitToConvert: 'rem',
+  rootValue: 16
+});
+// 结果: '2.00000rem'
+```
+
+## PostCSS 插件
 
 ### postcssPxConvert(options)
 
@@ -45,10 +59,25 @@ PostCSS 插件工厂函数。
 **返回值：**
 - `PostCSS Plugin`: PostCSS 插件实例
 
-**示例：**
-```js
-import postcssPxConvert from 'postcss-px-convert';
+**支持格式：**
 
+1. **对象格式**（传统配置）：
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    'postcss-px-convert': {
+      unitToConvert: 'rem',
+      rootValue: 37.5,
+      injectFlexibleScript: true
+    }
+  }
+}
+```
+
+2. **数组格式**（现代配置）：
+```js
+// postcss.config.js
 export default {
   plugins: [
     postcssPxConvert({
@@ -60,75 +89,125 @@ export default {
 }
 ```
 
-### viteFlexibleInject(options)
-
-Vite 插件，用于自动注入 flexible.js 到 HTML。
-
-**参数：**
-- `options` (ViteFlexibleInjectOptions): 插件配置
-  - `flexibleScriptPath` (string, 可选): flexible.js 路径，默认 '/flexible.js'
-
-**返回值：**
-- `Vite Plugin`: Vite 插件实例
-
-**示例：**
+3. **与其他插件一起使用**：
 ```js
-import { viteFlexibleInject } from 'postcss-px-convert';
+// postcss.config.js
+import postcssPresetEnv from "postcss-preset-env";
+import postcssPxConvert from "postcss-px-convert";
 
 export default {
   plugins: [
-    viteFlexibleInject({ flexibleScriptPath: '/flexible.js' })
+    postcssPresetEnv({
+      autoprefixer: {
+        grid: true,
+      },
+    }),
+    postcssPxConvert({
+      unitToConvert: 'rem',
+      rootValue: 16
+    })
   ]
 }
 ```
 
-### generateFlexibleScript(outPath?)
+## Vite 插件
 
-生成 flexible.js 文件。
+### viteFlexibleInject(options)
+
+Vite 插件，用于自动注入 flexible.js 脚本。
 
 **参数：**
-- `outPath` (string, 可选): 输出路径，默认项目根目录下的 'flexible.js'
-
-**返回值：**
-- `boolean`: 是否生成成功
+- `options` (ViteFlexibleInjectOptions): 插件配置选项
 
 **示例：**
-```ts
+```javascript
+import { defineConfig } from 'vite';
+import { viteFlexibleInject } from 'postcss-px-convert';
+
+export default defineConfig({
+  plugins: [
+    viteFlexibleInject({
+      flexibleScriptPath: './flexible.js'
+    })
+  ]
+});
+```
+
+## 工具函数
+
+### generateFlexibleScript(path?)
+
+生成 flexible.js 脚本文件。
+
+**参数：**
+- `path` (string, 可选): 脚本文件路径，默认为 './flexible.js'
+
+**示例：**
+```javascript
 import { generateFlexibleScript } from 'postcss-px-convert';
 
 generateFlexibleScript('./public/flexible.js');
+```
+
+### isFileIncluded(filepath, include, exclude)
+
+检查文件是否在包含/排除列表中。
+
+**参数：**
+- `filepath` (string): 文件路径
+- `include` ((string|RegExp)[]): 包含列表
+- `exclude` ((string|RegExp)[]): 排除列表
+
+**返回值：**
+- `boolean`: 是否包含
+
+**示例：**
+```javascript
+import { isFileIncluded } from 'postcss-px-convert';
+
+const included = isFileIncluded(
+  'src/styles/main.css',
+  ['src/**/*.css'],
+  ['src/vendor/**']
+);
 ```
 
 ## 类型定义
 
 ### Px2AnyOptions
 
-```ts
+```typescript
 interface Px2AnyOptions {
-  unitToConvert: 'rem' | 'vw';           // 转换目标单位
-  rootValue?: number;                    // rem 基准值，默认 16
-  viewportWidth?: number;                // vw 基准宽度，默认 375
-  unitPrecision?: number;                // 单位精度，默认 5
-  minPixelValue?: number;                // 最小转换数值，默认 1
-  selectorBlackList?: (string | RegExp)[]; // 选择器黑名单
-  propList?: string[];                   // 只转换指定属性，默认 ['*']
-  mediaQuery?: boolean;                  // 是否转换媒体查询 px，默认 false
-  include?: (string | RegExp)[];         // 只转换指定文件/文件夹
-  exclude?: (string | RegExp)[];         // 排除指定文件/文件夹
-  landscape?: boolean;                   // 是否横屏适配，默认 false
-  landscapeUnit?: 'rem' | 'vw';          // 横屏时转换单位
-  landscapeWidth?: number;               // 横屏基准宽度
-  ignoreComment?: string;                // 忽略注释，默认 'no'
-  customPxReplace?: (px: number, converted: string, unit: 'rem' | 'vw') => string; // 自定义转换函数
-  injectFlexibleScript?: boolean;        // 是否自动生成 flexible.js
-  flexibleScriptPath?: string;           // flexible.js 输出路径
+  unitToConvert?: 'rem' | 'vw';
+  rootValue?: number;
+  viewportWidth?: number;
+  unitPrecision?: number;
+  minPixelValue?: number;
+  selectorBlackList?: (string | RegExp)[];
+  propList?: string[];
+  mediaQuery?: boolean;
+  include?: (string | RegExp)[];
+  exclude?: (string | RegExp)[];
+  landscape?: boolean;
+  landscapeUnit?: string;
+  landscapeWidth?: number;
+  ignoreComment?: string;
+  customPxReplace?: (px: number, converted: string, unit: string) => string;
+  injectFlexibleScript?: boolean;
+  flexibleScriptPath?: string;
 }
+```
+
+### PostcssPxConvertOptions
+
+```typescript
+type PostcssPxConvertOptions = Px2AnyOptions | Px2AnyOptions[];
 ```
 
 ### ViteFlexibleInjectOptions
 
-```ts
+```typescript
 interface ViteFlexibleInjectOptions {
-  flexibleScriptPath?: string;           // flexible.js 路径
+  flexibleScriptPath?: string;
 }
 ``` 

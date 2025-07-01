@@ -1,10 +1,10 @@
 # API Documentation
 
-## Core API
+## Core Functions
 
 ### px2any(css, options)
 
-Converts px units to rem or vw in CSS string.
+Convert px units in CSS string to rem or vw.
 
 **Parameters:**
 - `css` (string): CSS string to convert
@@ -14,26 +14,40 @@ Converts px units to rem or vw in CSS string.
 - `string`: Converted CSS string
 
 **Example:**
-```ts
+```javascript
 import { px2any } from 'postcss-px-convert';
 
-const css = 'body { font-size: 32px; margin: 8px 16px; }';
-const result = px2any(css, { 
-  unitToConvert: 'rem', 
-  rootValue: 16 
+const css = 'body { font-size: 32px; }';
+const result = px2any(css, {
+  unitToConvert: 'rem',
+  rootValue: 16
 });
-// Output: body { font-size: 2.00000rem; margin: 0.50000rem 1.00000rem; }
+// Result: 'body { font-size: 2.00000rem; }'
 ```
 
-### px2anyPostcss(root, options)
+### px2anyValue(value, options)
 
-PostCSS plugin processing function.
+Convert a single px value to rem or vw.
 
 **Parameters:**
-- `root` (PostCSS Root): PostCSS root node
+- `value` (string): Single value to convert (e.g., "32px")
 - `options` (Px2AnyOptions): Conversion configuration options
 
-## Plugin API
+**Returns:**
+- `string`: Converted value
+
+**Example:**
+```javascript
+import { px2anyValue } from 'postcss-px-convert';
+
+const result = px2anyValue('32px', {
+  unitToConvert: 'rem',
+  rootValue: 16
+});
+// Result: '2.00000rem'
+```
+
+## PostCSS Plugin
 
 ### postcssPxConvert(options)
 
@@ -45,10 +59,25 @@ PostCSS plugin factory function.
 **Returns:**
 - `PostCSS Plugin`: PostCSS plugin instance
 
-**Example:**
-```js
-import postcssPxConvert from 'postcss-px-convert';
+**Supported Formats:**
 
+1. **Object Format** (Traditional configuration):
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    'postcss-px-convert': {
+      unitToConvert: 'rem',
+      rootValue: 37.5,
+      injectFlexibleScript: true
+    }
+  }
+}
+```
+
+2. **Array Format** (Modern configuration):
+```js
+// postcss.config.js
 export default {
   plugins: [
     postcssPxConvert({
@@ -60,75 +89,125 @@ export default {
 }
 ```
 
-### viteFlexibleInject(options)
-
-Vite plugin that automatically injects flexible.js into HTML.
-
-**Parameters:**
-- `options` (ViteFlexibleInjectOptions): Plugin configuration
-  - `flexibleScriptPath` (string, optional): flexible.js path, default '/flexible.js'
-
-**Returns:**
-- `Vite Plugin`: Vite plugin instance
-
-**Example:**
+3. **With Other Plugins**:
 ```js
-import { viteFlexibleInject } from 'postcss-px-convert';
+// postcss.config.js
+import postcssPresetEnv from "postcss-preset-env";
+import postcssPxConvert from "postcss-px-convert";
 
 export default {
   plugins: [
-    viteFlexibleInject({ flexibleScriptPath: '/flexible.js' })
+    postcssPresetEnv({
+      autoprefixer: {
+        grid: true,
+      },
+    }),
+    postcssPxConvert({
+      unitToConvert: 'rem',
+      rootValue: 16
+    })
   ]
 }
 ```
 
-### generateFlexibleScript(outPath?)
+## Vite Plugin
 
-Generates flexible.js file.
+### viteFlexibleInject(options)
+
+Vite plugin for automatically injecting flexible.js script.
 
 **Parameters:**
-- `outPath` (string, optional): Output path, default 'flexible.js' in project root
-
-**Returns:**
-- `boolean`: Whether generation was successful
+- `options` (ViteFlexibleInjectOptions): Plugin configuration options
 
 **Example:**
-```ts
+```javascript
+import { defineConfig } from 'vite';
+import { viteFlexibleInject } from 'postcss-px-convert';
+
+export default defineConfig({
+  plugins: [
+    viteFlexibleInject({
+      flexibleScriptPath: './flexible.js'
+    })
+  ]
+});
+```
+
+## Utility Functions
+
+### generateFlexibleScript(path?)
+
+Generate flexible.js script file.
+
+**Parameters:**
+- `path` (string, optional): Script file path, defaults to './flexible.js'
+
+**Example:**
+```javascript
 import { generateFlexibleScript } from 'postcss-px-convert';
 
 generateFlexibleScript('./public/flexible.js');
+```
+
+### isFileIncluded(filepath, include, exclude)
+
+Check if file is in include/exclude lists.
+
+**Parameters:**
+- `filepath` (string): File path
+- `include` ((string|RegExp)[]): Include list
+- `exclude` ((string|RegExp)[]): Exclude list
+
+**Returns:**
+- `boolean`: Whether included
+
+**Example:**
+```javascript
+import { isFileIncluded } from 'postcss-px-convert';
+
+const included = isFileIncluded(
+  'src/styles/main.css',
+  ['src/**/*.css'],
+  ['src/vendor/**']
+);
 ```
 
 ## Type Definitions
 
 ### Px2AnyOptions
 
-```ts
+```typescript
 interface Px2AnyOptions {
-  unitToConvert: 'rem' | 'vw';           // Target unit for conversion
-  rootValue?: number;                    // rem base value, default 16
-  viewportWidth?: number;                // vw base width, default 375
-  unitPrecision?: number;                // Unit precision, default 5
-  minPixelValue?: number;                // Minimum pixel value to convert, default 1
-  selectorBlackList?: (string | RegExp)[]; // Selector blacklist
-  propList?: string[];                   // Only convert specific properties, default ['*']
-  mediaQuery?: boolean;                  // Whether to convert media queries, default false
-  include?: (string | RegExp)[];         // Only convert specified files/folders
-  exclude?: (string | RegExp)[];         // Exclude specified files/folders
-  landscape?: boolean;                   // Enable landscape adaptation, default false
-  landscapeUnit?: 'rem' | 'vw';          // Landscape conversion unit
-  landscapeWidth?: number;               // Landscape base width
-  ignoreComment?: string;                // Ignore comment, default 'no'
-  customPxReplace?: (px: number, converted: string, unit: 'rem' | 'vw') => string; // Custom conversion function
-  injectFlexibleScript?: boolean;        // Auto-generate flexible.js
-  flexibleScriptPath?: string;           // flexible.js output path
+  unitToConvert?: 'rem' | 'vw';
+  rootValue?: number;
+  viewportWidth?: number;
+  unitPrecision?: number;
+  minPixelValue?: number;
+  selectorBlackList?: (string | RegExp)[];
+  propList?: string[];
+  mediaQuery?: boolean;
+  include?: (string | RegExp)[];
+  exclude?: (string | RegExp)[];
+  landscape?: boolean;
+  landscapeUnit?: string;
+  landscapeWidth?: number;
+  ignoreComment?: string;
+  customPxReplace?: (px: number, converted: string, unit: string) => string;
+  injectFlexibleScript?: boolean;
+  flexibleScriptPath?: string;
 }
+```
+
+### PostcssPxConvertOptions
+
+```typescript
+type PostcssPxConvertOptions = Px2AnyOptions | Px2AnyOptions[];
 ```
 
 ### ViteFlexibleInjectOptions
 
-```ts
+```typescript
 interface ViteFlexibleInjectOptions {
-  flexibleScriptPath?: string;           // flexible.js path
+  flexibleScriptPath?: string;
 }
 ``` 
