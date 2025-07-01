@@ -158,6 +158,30 @@ export default defineConfig({
 });
 ```
 
+### 现代 PostCSS 配置（数组格式）
+
+```js
+// postcss.config.js
+import postcssPresetEnv from "postcss-preset-env";
+import postcssPxConvert from "postcss-px-convert";
+
+export default {
+  plugins: [
+    postcssPresetEnv({
+      autoprefixer: {
+        grid: true,
+      },
+    }),
+    postcssPxConvert({
+      unitToConvert: 'rem',
+      rootValue: 16
+    })
+  ]
+};
+```
+
+这种配置格式与你的示例完全兼容，插件支持标准的 PostCSS 数组格式配置。
+
 ## 📖 文档
 
 - [API 文档](./docs/api.md) - 详细的 API 参考 | [English](./docs/api.en.md)

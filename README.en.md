@@ -131,6 +131,30 @@ export default defineConfig({
 });
 ```
 
+### Modern PostCSS Configuration (Array Format)
+
+```js
+// postcss.config.js
+import postcssPresetEnv from "postcss-preset-env";
+import postcssPxConvert from "postcss-px-convert";
+
+export default {
+  plugins: [
+    postcssPresetEnv({
+      autoprefixer: {
+        grid: true,
+      },
+    }),
+    postcssPxConvert({
+      unitToConvert: 'rem',
+      rootValue: 16
+    })
+  ]
+};
+```
+
+This configuration format is fully compatible with your example. The plugin supports standard PostCSS array format configuration.
+
 ## 📖 Documentation
 
 - [API Documentation](./docs/api.en.md) - Detailed API reference | [中文](./docs/api.md)
