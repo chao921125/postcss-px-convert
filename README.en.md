@@ -6,7 +6,7 @@
 
 A powerful PostCSS plugin and Node.js tool that converts px units to rem or vw in CSS, suitable for responsive mobile development.
 
-[中文文档](./README.md)
+English | [中文文档](./README.md)
 
 ## ✨ Features
 

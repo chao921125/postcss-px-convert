@@ -1,10 +1,11 @@
 # postcss-px-convert
 
+一个功能强大的 PostCSS 插件和 Node.js 工具，支持将 CSS 中的 px 单位转换为 rem 或 vw，适用于移动端响应式开发。
+
 [![npm version](https://img.shields.io/npm/v/postcss-px-convert.svg)](https://www.npmjs.com/package/postcss-px-convert)
 [![npm downloads](https://img.shields.io/npm/dm/postcss-px-convert.svg)](https://www.npmjs.com/package/postcss-px-convert)
 [![License](https://img.shields.io/npm/l/postcss-px-convert.svg)](https://github.com/chao921125/postcss-px-convert/blob/main/LICENSE)
 
-一个功能强大的 PostCSS 插件和 Node.js 工具，支持将 CSS 中的 px 单位转换为 rem 或 vw，适用于移动端响应式开发。
 
 [English Documentation](./README.en.md)
 
