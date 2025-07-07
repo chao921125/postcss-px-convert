@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/npm/l/postcss-px-convert.svg)](https://github.com/chao921125/postcss-px-convert/blob/main/LICENSE)
 
 
-[English Documentation](./README.en.md)
+[English](./README.en.md) | 中文文档
 
 ## ✨ 特性
 
