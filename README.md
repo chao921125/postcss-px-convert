@@ -267,7 +267,7 @@ body {
 | `landscape`            | `boolean`              | `false` | 是否启用横屏适配         |
 | `injectFlexibleScript` | `boolean`              | `false` | 是否生成 flexible.js |
 
-更多配置选项请查看 [配置说明](./docs/configuration.md)。
+更多配置选项请查看 [配置说明](./docs/CONFIGURATION.md)。
 
 ## 📱 移动端适配
 
