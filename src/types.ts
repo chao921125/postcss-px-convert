@@ -20,6 +20,11 @@ export interface Px2AnyOptions {
   flexibleScriptPath?: string;  // flexible.js 输出路径
 }
 
+export interface PostcssPxConvertOptions extends Px2AnyOptions {}
+
 export interface ViteFlexibleInjectOptions {
   flexibleScriptPath?: string;
+  minFontSize?: number;  // 最小字体大小（px）
+  maxFontSize?: number;  // 最大字体大小（px）
+  baseWidth?: number;    // 基准宽度，默认 375
 }

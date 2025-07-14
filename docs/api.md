@@ -209,5 +209,42 @@ type PostcssPxConvertOptions = Px2AnyOptions | Px2AnyOptions[];
 ```typescript
 interface ViteFlexibleInjectOptions {
   flexibleScriptPath?: string;
+  minFontSize?: number;  // 最小字体大小（px）
+  maxFontSize?: number;  // 最大字体大小（px）
+  baseWidth?: number;    // 基准宽度，默认 375
 }
+```
+
+**参数说明：**
+
+- `flexibleScriptPath` (string, 可选): flexible.js 脚本路径，默认为 '/flexible.js'
+- `minFontSize` (number, 可选): 最小字体大小，防止在极小屏幕下字体过小
+- `maxFontSize` (number, 可选): 最大字体大小，防止在极大屏幕下字体过大
+- `baseWidth` (number, 可选): 基准宽度，用于计算 rem 单位，默认为 375
+
+**使用示例：**
+
+```javascript
+import { defineConfig } from 'vite';
+import { viteFlexibleInject } from 'postcss-px-convert';
+
+export default defineConfig({
+  plugins: [
+    // 基础用法
+    viteFlexibleInject(),
+    
+    // 带边界限制
+    viteFlexibleInject({
+      minFontSize: 12,  // 最小 12px
+      maxFontSize: 24,  // 最大 24px
+      baseWidth: 375    // 基准宽度 375px
+    }),
+    
+    // 只有最小值限制
+    viteFlexibleInject({
+      minFontSize: 14,
+      baseWidth: 750
+    })
+  ]
+});
 ``` 
