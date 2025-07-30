@@ -21,10 +21,10 @@ function generateFlexibleScriptContent(options: ViteFlexibleInjectOptions = {}):
   // 只在传参时插入边界判断
   let boundaryLogic = '';
   if (hasMin) {
-    boundaryLogic += '\n    if (minFontSize !== null && rem < minFontSize) { rem = minFontSize; }';
+    boundaryLogic += `\n    if (minFontSize !== null && rem < minFontSize) { rem = minFontSize; }`;
   }
   if (hasMax) {
-    boundaryLogic += '\n    if (maxFontSize !== null && rem > maxFontSize) { rem = maxFontSize; }';
+    boundaryLogic += `\n    if (maxFontSize !== null && rem > maxFontSize) { rem = maxFontSize; }`;
   }
 
   return `
@@ -38,8 +38,18 @@ function generateFlexibleScriptContent(options: ViteFlexibleInjectOptions = {}):
     var rem = docEl.clientWidth / (baseWidth / 10);${boundaryLogic}
     docEl.style.fontSize = rem + 'px';
   }
+  
   setRemUnit();
-  window.addEventListener('resize', setRemUnit);
+  
+  // 防抖处理，避免频繁触发
+  var timer = null;
+  function debounceSetRemUnit() {
+    clearTimeout(timer);
+    timer = setTimeout(setRemUnit, 100);
+  }
+  
+  window.addEventListener('resize', debounceSetRemUnit);
+  window.addEventListener('orientationchange', setRemUnit);
 })();
 `;
 }
