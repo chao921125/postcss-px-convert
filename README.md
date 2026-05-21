@@ -19,6 +19,7 @@
 - 🔌 **插件生态**: 提供 PostCSS 插件和 Vite 插件
 - 📦 **自动生成**: 支持自动生成和注入 flexible.js
 - 🎨 **过滤功能**: 支持选择器、属性、文件等多种过滤方式
+- 🔄 **混合单位**: 支持 vw 和 rem 混合使用，不同属性可使用不同单位
 
 ## 📦 安装
 
@@ -159,6 +160,67 @@ export default defineConfig({
 });
 ```
 
+### vw + rem 混合配置示例
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    'postcss-px-convert': {
+      unitToConvert: 'rem',      // 默认单位
+      rootValue: 37.5,           // rem 基准值
+      viewportWidth: 375,        // vw 基准宽度
+      unitPrecision: 5,
+      propList: ['*'],
+      selectorBlackList: [],
+      replace: true,
+      mediaQuery: false,
+      minPixelValue: 1,
+      // 混合单位配置
+      unitMap: {
+        'font-*': 'rem',         // 字体相关用 rem
+        'line-height': 'rem',
+        'width': 'vw',           // 布局尺寸用 vw
+        'height': 'vw',
+        'min-width': 'vw',
+        'max-width': 'vw',
+        'margin*': 'rem',        // 间距用 rem
+        'padding*': 'rem',
+        'border-radius': 'rem',  // 边框用 rem
+        'top': 'vw',             // 定位用 vw
+        'left': 'vw',
+        'right': 'vw',
+        'bottom': 'vw',
+      },
+      injectFlexibleScript: true
+    }
+  }
+}
+```
+
+**转换效果：**
+```css
+/* 输入 */
+.container {
+  width: 375px;              /* → 100.00000vw */
+  height: 100px;             /* → 26.66667vw */
+  font-size: 32px;           /* → 0.85333rem */
+  margin: 20px;              /* → 0.53333rem */
+  padding: 16px;             /* → 0.42667rem */
+  border-radius: 8px;        /* → 0.21333rem */
+  top: 50px;                 /* → 13.33333vw */
+}
+
+/* 内联注释控制（更高优先级）*/
+.special {
+  /* px-convert:vw */
+  font-size: 32px;           /* 强制转为 vw */
+  
+  /* px-convert:rem */
+  width: 375px;              /* 强制转为 rem */
+}
+```
+
 ### 现代 PostCSS 配置（数组格式）
 
 ```js
@@ -265,7 +327,8 @@ body {
 | `propList`             | `string[]`             | `['*']` | 属性过滤列表           |
 | `mediaQuery`           | `boolean`              | `false` | 是否转换媒体查询         |
 | `landscape`            | `boolean`              | `false` | 是否启用横屏适配         |
-| `injectFlexibleScript` | `boolean`              | `false` | 是否生成 flexible.js |
+| `injectFlexibleScript` | `boolean`              | `false` | 是否生成 flexible.js   |
+| `unitMap`              | `UnitMap`              | `{}`    | 属性单位映射（支持混合单位） |
 
 更多配置选项请查看 [配置说明](./docs/CONFIGURATION.md)。
 
@@ -318,6 +381,49 @@ body {
   viewportWidth: 375
 }
 ```
+
+### vw + rem 混合方案
+
+通过 `unitMap` 配置，可以让不同 CSS 属性使用不同的转换单位：
+
+```js
+{
+  unitToConvert: 'rem',      // 默认单位
+  rootValue: 37.5,
+  viewportWidth: 375,
+  unitMap: {
+    // 字体相关使用 rem（保持可读性）
+    'font-*': 'rem',
+    'line-height': 'rem',
+    
+    // 布局尺寸使用 vw（响应式更好）
+    'width': 'vw',
+    'height': 'vw',
+    'min-width': 'vw',
+    'max-width': 'vw',
+    
+    // 间距使用 rem
+    'margin*': 'rem',
+    'padding*': 'rem',
+    
+    // 定位使用 vw
+    'top': 'vw',
+    'left': 'vw',
+    'right': 'vw',
+    'bottom': 'vw',
+  }
+}
+```
+
+**为什么需要混合使用？**
+- **rem 适合字体和间距**：保持相对比例，用户体验更好
+- **vw 适合布局和定位**：更好地适应不同屏幕宽度
+- **灵活性**：可以根据属性特点选择最合适的单位
+
+**配置优先级：**
+1. 内联注释 `/* px-convert:vw */` - 最高优先级
+2. `unitMap` 配置 - 中等优先级  
+3. `unitToConvert` 默认配置 - 最低优先级
 
 ## 🔌 插件支持
 
