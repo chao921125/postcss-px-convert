@@ -104,6 +104,52 @@ propList: ['font-size', 'margin*', '*padding']
 - **Default**: `''`
 - **Description**: flexible.js output path, defaults to project root
 
+## Mixed Unit Configuration
+
+### unitMap
+- **Type**: `UnitMap`
+- **Default**: `{}`
+- **Description**: Property-level unit mapping configuration, allows different CSS properties to use different conversion units
+
+**Supported wildcard patterns:**
+- `font-*` - Matches all properties starting with `font-` (e.g., `font-size`, `font-weight`)
+- `*size` - Matches all properties ending with `size` (e.g., `font-size`, `icon-size`)
+- `margin*` - Matches `margin` and its sub-properties (e.g., `margin`, `margin-top`, `margin-bottom`)
+
+**Priority (from high to low):**
+1. Inline comment `/* px-convert:vw */` or `/* px-convert:rem */` - Highest priority
+2. `unitMap` configuration - Medium priority
+3. `unitToConvert` default configuration - Lowest priority
+
+**Example:**
+```js
+unitMap: {
+  'font-size': 'rem',      // Font uses rem
+  'width': 'vw',           // Width uses vw
+  'height': 'vw',          // Height uses vw
+  'margin*': 'rem',        // Margin uses rem
+  'padding*': 'rem'        // Padding uses rem
+}
+```
+
+### Inline Comment Control
+Use special comments in CSS to force specify conversion unit:
+
+```css
+.container {
+  /* px-convert:vw */
+  width: 375px;    /* Force convert to vw */
+  height: 100px;   /* Force convert to vw */
+}
+
+.text {
+  /* px-convert:rem */
+  font-size: 32px; /* Force convert to rem */
+}
+```
+
+**Note:** Inline comment scope is the current CSS rule block (from `{` to `}`), automatically resets when entering a new rule block.
+
 ## Configuration Examples
 
 ### Basic rem Conversion
@@ -156,4 +202,39 @@ propList: ['font-size', 'margin*', '*padding']
   injectFlexibleScript: true,
   flexibleScriptPath: './public/flexible.js'
 }
-``` 
+```
+
+### vw + rem Mixed Conversion
+
+Using `unitMap` configuration, different CSS properties can use different conversion units:
+
+```js
+{
+  unitToConvert: 'rem',      // Default unit (for properties not in unitMap)
+  rootValue: 37.5,
+  viewportWidth: 375,
+  unitMap: {
+    'width': 'vw',           // Layout uses vw
+    'height': 'vw',
+    'font-*': 'rem',         // Font uses rem
+    'margin*': 'rem',        // Spacing uses rem
+    'padding*': 'rem',
+  }
+}
+```
+
+**Conversion result:**
+```css
+.container {
+  width: 375px;        /* → 100vw (specified by unitMap) */
+  height: 200px;       /* → 53.33vw (specified by unitMap) */
+  font-size: 32px;     /* → 0.85rem (specified by unitMap) */
+  margin: 20px;        /* → 0.53rem (specified by unitMap) */
+  border-radius: 8px;  /* → 0.21rem (uses default unitToConvert: 'rem') */
+}
+```
+
+**Recommendations:**
+- **rem** is suitable for fonts and spacing, maintaining relative proportions
+- **vw** is suitable for layouts and positioning, better adapting to screen width
+- Properties not configured in `unitMap` will use the default unit specified by `unitToConvert` 

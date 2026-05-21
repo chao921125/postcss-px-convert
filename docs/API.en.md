@@ -195,6 +195,7 @@ interface Px2AnyOptions {
   customPxReplace?: (px: number, converted: string, unit: string) => string;
   injectFlexibleScript?: boolean;
   flexibleScriptPath?: string;
+  unitMap?: UnitMap;  // Property unit mapping (mixed units)
 }
 ```
 

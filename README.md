@@ -162,37 +162,23 @@ export default defineConfig({
 
 ### vw + rem 混合配置示例
 
+混合模式允许不同 CSS 属性使用不同的转换单位，实现更精细的响应式控制：
+
 ```js
 // postcss.config.js
 module.exports = {
   plugins: {
     'postcss-px-convert': {
-      unitToConvert: 'rem',      // 默认单位
+      unitToConvert: 'rem',      // 默认单位（未在 unitMap 中配置的属性都使用此单位）
       rootValue: 37.5,           // rem 基准值
       viewportWidth: 375,        // vw 基准宽度
-      unitPrecision: 5,
-      propList: ['*'],
-      selectorBlackList: [],
-      replace: true,
-      mediaQuery: false,
-      minPixelValue: 1,
-      // 混合单位配置
       unitMap: {
-        'font-*': 'rem',         // 字体相关用 rem
-        'line-height': 'rem',
         'width': 'vw',           // 布局尺寸用 vw
         'height': 'vw',
-        'min-width': 'vw',
-        'max-width': 'vw',
+        'font-*': 'rem',         // 字体相关用 rem
         'margin*': 'rem',        // 间距用 rem
         'padding*': 'rem',
-        'border-radius': 'rem',  // 边框用 rem
-        'top': 'vw',             // 定位用 vw
-        'left': 'vw',
-        'right': 'vw',
-        'bottom': 'vw',
       },
-      injectFlexibleScript: true
     }
   }
 }
@@ -200,24 +186,23 @@ module.exports = {
 
 **转换效果：**
 ```css
-/* 输入 */
 .container {
-  width: 375px;              /* → 100.00000vw */
-  height: 100px;             /* → 26.66667vw */
-  font-size: 32px;           /* → 0.85333rem */
-  margin: 20px;              /* → 0.53333rem */
-  padding: 16px;             /* → 0.42667rem */
-  border-radius: 8px;        /* → 0.21333rem */
-  top: 50px;                 /* → 13.33333vw */
+  width: 375px;        /* → 100vw (unitMap 指定) */
+  height: 200px;       /* → 53.33vw (unitMap 指定) */
+  font-size: 32px;     /* → 0.85rem (unitMap 指定) */
+  margin: 20px;        /* → 0.53rem (unitMap 指定) */
+  border-radius: 8px;  /* → 0.21rem (使用默认 unitToConvert: 'rem') */
 }
+```
 
-/* 内联注释控制（更高优先级）*/
+**特殊控制：** 可通过注释临时覆盖单位配置：
+```css
 .special {
   /* px-convert:vw */
-  font-size: 32px;           /* 强制转为 vw */
+  font-size: 32px;     /* 强制转为 vw，而非 unitMap 配置的 rem */
   
   /* px-convert:rem */
-  width: 375px;              /* 强制转为 rem */
+  width: 375px;        /* 强制转为 rem，而非 unitMap 配置的 vw */
 }
 ```
 
@@ -384,46 +369,32 @@ body {
 
 ### vw + rem 混合方案
 
-通过 `unitMap` 配置，可以让不同 CSS 属性使用不同的转换单位：
+通过 `unitMap` 配置，不同属性可使用不同的转换单位：
 
 ```js
 {
-  unitToConvert: 'rem',      // 默认单位
+  unitToConvert: 'rem',      // 默认单位（未配置的单位）
   rootValue: 37.5,
   viewportWidth: 375,
   unitMap: {
-    // 字体相关使用 rem（保持可读性）
-    'font-*': 'rem',
-    'line-height': 'rem',
-    
-    // 布局尺寸使用 vw（响应式更好）
-    'width': 'vw',
+    'width': 'vw',           // 布局使用 vw
     'height': 'vw',
-    'min-width': 'vw',
-    'max-width': 'vw',
-    
-    // 间距使用 rem
-    'margin*': 'rem',
+    'font-size': 'rem',      // 字体使用 rem
+    'margin*': 'rem',        // 间距使用 rem
     'padding*': 'rem',
-    
-    // 定位使用 vw
-    'top': 'vw',
-    'left': 'vw',
-    'right': 'vw',
-    'bottom': 'vw',
   }
 }
 ```
 
-**为什么需要混合使用？**
-- **rem 适合字体和间距**：保持相对比例，用户体验更好
-- **vw 适合布局和定位**：更好地适应不同屏幕宽度
-- **灵活性**：可以根据属性特点选择最合适的单位
+**使用建议：**
+- **rem** 适合字体和间距，保持相对比例
+- **vw** 适合布局和定位，更好地适应屏幕宽度
+- 未在 `unitMap` 中配置的属性，使用 `unitToConvert` 指定的默认单位
 
-**配置优先级：**
-1. 内联注释 `/* px-convert:vw */` - 最高优先级
-2. `unitMap` 配置 - 中等优先级  
-3. `unitToConvert` 默认配置 - 最低优先级
+**优先级（从高到低）：**
+1. 内联注释：`/* px-convert:vw */` 或 `/* px-convert:rem */`
+2. `unitMap` 配置
+3. `unitToConvert` 默认配置
 
 ## 🔌 插件支持
 

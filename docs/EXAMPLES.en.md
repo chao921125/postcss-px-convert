@@ -291,6 +291,53 @@ body {
 }
 ```
 
+### vw + rem Mixed Units
+
+Using `unitMap` configuration, different CSS properties can use different conversion units:
+
+```js
+const postcssPxConvert = require('postcss-px-convert');
+
+module.exports = {
+  plugins: [
+    postcssPxConvert({
+      unitToConvert: 'rem',      // Default unit
+      rootValue: 37.5,
+      viewportWidth: 375,
+      unitMap: {
+        'width': 'vw',           // Layout uses vw
+        'height': 'vw',
+        'font-*': 'rem',         // Font uses rem
+        'margin*': 'rem',        // Spacing uses rem
+        'padding*': 'rem',
+      }
+    })
+  ]
+};
+```
+
+**Conversion result:**
+```css
+.container {
+  width: 375px;        /* → 100vw */
+  height: 200px;       /* → 53.33vw */
+  font-size: 32px;     /* → 0.85rem */
+  margin: 20px;        /* → 0.53rem */
+  border-radius: 8px;  /* → 0.21rem (uses default unit) */
+}
+```
+
+**Temporary override with inline comments:**
+```css
+.special {
+  /* px-convert:vw */
+  font-size: 32px;     /* Force convert to vw */
+  
+  /* px-convert:rem */
+  width: 375px;        /* Force convert to rem */
+}
+```
+
 ## Complete Project Examples
 
 ### React + Vite Project

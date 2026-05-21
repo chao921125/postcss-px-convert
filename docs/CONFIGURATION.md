@@ -204,94 +204,40 @@ unitMap: {
 }
 ```
 
-### vw + rem 混合转换（推荐 - 使用通配符）
+### vw + rem 混合转换
 
-**配置说明：**
-- 只有配置在 `unitMap` 中的属性才会转换
-- 未配置的属性保持原始 `px` 单位不变
-- 使用通配符可以批量配置同类属性
+通过 `unitMap` 配置，不同属性可使用不同的转换单位：
 
 ```js
 {
-  unitToConvert: 'rem',      // 默认单位（当属性未在 unitMap 中配置时使用）
-  rootValue: 37.5,           // rem 基准值：37.5px = 1rem
-  viewportWidth: 375,        // vw 基准宽度：375px = 100vw
-  propList: ['*'],           // 处理所有属性
+  unitToConvert: 'rem',      // 默认单位（未在 unitMap 中配置的属性使用此单位）
+  rootValue: 37.5,
+  viewportWidth: 375,
   unitMap: {
-    // ========== 字体相关（使用 rem）==========
-    'font-*': 'rem',         // 匹配 font-size, font-weight, font-style 等
-    'line-height': 'rem',    // 行高
-    'letter-spacing': 'rem', // 字间距
-    'word-spacing': 'rem',   // 词间距
-    
-    // ========== 布局尺寸（使用 vw）==========
-    'width': 'vw',           // 宽度
-    'height': 'vw',          // 高度
-    'min-width': 'vw',       // 最小宽度
-    'max-width': 'vw',       // 最大宽度
-    'min-height': 'vw',      // 最小高度
-    'max-height': 'vw',      // 最大高度
-    
-    // ========== 定位（使用 vw）==========
-    'top': 'vw',             // 上定位
-    'left': 'vw',            // 左定位
-    'right': 'vw',           // 右定位
-    'bottom': 'vw',          // 下定位
-    
-    // ========== 间距（使用 rem）==========
-    'margin*': 'rem',        // 匹配 margin, margin-top, margin-bottom, margin-left, margin-right
-    'padding*': 'rem',       // 匹配 padding, padding-top, padding-bottom, padding-left, padding-right
-    'gap': 'rem',            // 网格间距
-    'row-gap': 'rem',        // 行间距
-    'column-gap': 'rem',     // 列间距
-    
-    // ========== 边框（使用 rem）==========
-    'border-radius': 'rem',  // 圆角
-    'border-width': 'rem',   // 边框宽度
-    'outline-width': 'rem',  // 轮廓宽度
-    
-    // ========== 特殊尺寸（使用 vw）==========
-    '*size': 'vw',           // 匹配所有以 size 结尾的属性（如 icon-size, box-size）
-    'translateX': 'vw',      // X 轴平移
-    'translateY': 'vw',      // Y 轴平移
-  },
-  injectFlexibleScript: true  // 自动生成 flexible.js
+    'width': 'vw',           // 布局使用 vw
+    'height': 'vw',
+    'font-*': 'rem',         // 字体使用 rem
+    'margin*': 'rem',        // 间距使用 rem
+    'padding*': 'rem',
+  }
 }
 ```
 
-**转换效果示例：**
-
+**转换效果：**
 ```css
-/* 原始 CSS */
 .container {
-  /* 会转换的属性 */
-  width: 375px;              /* → 100.00000vw */
-  height: 100px;             /* → 26.66667vw */
-  font-size: 32px;           /* → 0.85333rem */
-  font-weight: 400px;        /* → 10.66667rem */
-  margin: 20px;              /* → 0.53333rem */
-  margin-top: 10px;          /* → 0.26667rem */
-  padding: 16px;             /* → 0.42667rem */
-  padding-left: 12px;        /* → 0.32000rem */
-  border-radius: 8px;        /* → 0.21333rem */
-  top: 50px;                 /* → 13.33333vw */
-  
-  /* 不会转换的属性（未在 unitMap 中配置）*/
-  background: #fff;          /* 保持原样 */
-  color: #333;               /* 保持原样 */
-  display: flex;             /* 保持原样 */
-  opacity: 0.8;              /* 保持原样 */
-  z-index: 100;              /* 保持原样 */
-  overflow: hidden;          /* 保持原样 */
-  text-align: center;        /* 保持原样 */
-}
-
-/* 特殊通配符示例 */
-.icon {
-  icon-size: 48px;           /* → 12.80000vw (匹配 *size) */
-  box-size: 100px;           /* → 26.66667vw (匹配 *size) */
+  width: 375px;        /* → 100vw (unitMap 指定) */
+  height: 200px;       /* → 53.33vw (unitMap 指定) */
+  font-size: 32px;     /* → 0.85rem (unitMap 指定) */
+  margin: 20px;        /* → 0.53rem (unitMap 指定) */
+  border-radius: 8px;  /* → 0.21rem (使用默认 unitToConvert: 'rem') */
 }
 ```
+
+**使用建议：**
+- **rem** 适合字体和间距，保持相对比例
+- **vw** 适合布局和定位，更好地适应屏幕宽度
+- 未在 `unitMap` 中配置的属性，使用 `unitToConvert` 指定的默认单位
 
 ### 使用内联注释的混合转换
 ```css

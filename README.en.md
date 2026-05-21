@@ -18,6 +18,7 @@ English | [中文文档](./README.md)
 - 🔌 **Plugin Ecosystem**: Provides PostCSS plugin and Vite plugin
 - 📦 **Auto Generation**: Supports automatic generation and injection of flexible.js
 - 🎨 **Filtering**: Supports selector, property, and file-based filtering
+- 🔄 **Mixed Units**: Supports vw and rem mixed usage, different properties can use different units
 
 ## 📦 Installation
 
@@ -155,6 +156,52 @@ export default {
 
 This configuration format is fully compatible with your example. The plugin supports standard PostCSS array format configuration.
 
+### vw + rem Mixed Configuration Example
+
+Mixed mode allows different CSS properties to use different conversion units for more precise responsive control:
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    'postcss-px-convert': {
+      unitToConvert: 'rem',      // Default unit (properties not in unitMap use this)
+      rootValue: 37.5,           // rem base value
+      viewportWidth: 375,        // vw base width
+      unitMap: {
+        'width': 'vw',           // Layout uses vw
+        'height': 'vw',
+        'font-*': 'rem',         // Font uses rem
+        'margin*': 'rem',        // Spacing uses rem
+        'padding*': 'rem',
+      },
+    }
+  }
+}
+```
+
+**Conversion result:**
+```css
+.container {
+  width: 375px;        /* → 100vw (specified by unitMap) */
+  height: 200px;       /* → 53.33vw (specified by unitMap) */
+  font-size: 32px;     /* → 0.85rem (specified by unitMap) */
+  margin: 20px;        /* → 0.53rem (specified by unitMap) */
+  border-radius: 8px;  /* → 0.21rem (uses default unitToConvert: 'rem') */
+}
+```
+
+**Special control:** Temporarily override unit configuration with comments:
+```css
+.special {
+  /* px-convert:vw */
+  font-size: 32px;     /* Force convert to vw, not rem configured in unitMap */
+  
+  /* px-convert:rem */
+  width: 375px;        /* Force convert to rem, not vw configured in unitMap */
+}
+```
+
 ## 📖 Documentation
 
 - [API Documentation](./docs/api.en.md) - Detailed API reference | [中文](./docs/api.md)
@@ -238,6 +285,7 @@ Support different conversion rules for landscape mode:
 | `mediaQuery`           | `boolean`              | `false`   | Convert media queries |
 | `landscape`            | `boolean`              | `false`   | Landscape adaptation  |
 | `injectFlexibleScript` | `boolean`              | `false`   | Generate flexible.js  |
+| `unitMap`              | `UnitMap`              | `{}`      | Property unit mapping (mixed units) |
 
 For more configuration options, see the [Configuration Guide](./docs/configuration.en.md).
 
@@ -290,6 +338,35 @@ Use the design draft width directly:
   viewportWidth: 375
 }
 ```
+
+### vw + rem Mixed Approach
+
+Using `unitMap` configuration, different CSS properties can use different conversion units:
+
+```js
+{
+  unitToConvert: 'rem',      // Default unit (for properties not in unitMap)
+  rootValue: 37.5,
+  viewportWidth: 375,
+  unitMap: {
+    'width': 'vw',           // Layout uses vw
+    'height': 'vw',
+    'font-size': 'rem',      // Font uses rem
+    'margin*': 'rem',        // Spacing uses rem
+    'padding*': 'rem',
+  }
+}
+```
+
+**Recommendations:**
+- **rem** is suitable for fonts and spacing, maintaining relative proportions
+- **vw** is suitable for layouts and positioning, better adapting to screen width
+- Properties not configured in `unitMap` will use the default unit specified by `unitToConvert`
+
+**Priority (from high to low):**
+1. Inline comment: `/* px-convert:vw */` or `/* px-convert:rem */`
+2. `unitMap` configuration
+3. `unitToConvert` default configuration
 
 ## 🔌 Plugin Support
 

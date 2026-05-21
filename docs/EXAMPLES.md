@@ -291,6 +291,53 @@ body {
 }
 ```
 
+### vw + rem 混合单位
+
+通过 `unitMap` 配置，不同属性可使用不同的转换单位：
+
+```js
+const postcssPxConvert = require('postcss-px-convert');
+
+module.exports = {
+  plugins: [
+    postcssPxConvert({
+      unitToConvert: 'rem',      // 默认单位
+      rootValue: 37.5,
+      viewportWidth: 375,
+      unitMap: {
+        'width': 'vw',           // 布局使用 vw
+        'height': 'vw',
+        'font-*': 'rem',         // 字体使用 rem
+        'margin*': 'rem',        // 间距使用 rem
+        'padding*': 'rem',
+      }
+    })
+  ]
+};
+```
+
+**转换效果：**
+```css
+.container {
+  width: 375px;        /* → 100vw */
+  height: 200px;       /* → 53.33vw */
+  font-size: 32px;     /* → 0.85rem */
+  margin: 20px;        /* → 0.53rem */
+  border-radius: 8px;  /* → 0.21rem (使用默认单位) */
+}
+```
+
+**使用内联注释临时覆盖：**
+```css
+.special {
+  /* px-convert:vw */
+  font-size: 32px;     /* 强制转为 vw */
+  
+  /* px-convert:rem */
+  width: 375px;        /* 强制转为 rem */
+}
+```
+
 ## 完整项目示例
 
 ### React + Vite 项目

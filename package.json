@@ -1,6 +1,6 @@
 {
 	"name": "postcss-px-convert",
-	"version": "1.4.2",
+	"version": "1.4.3",
 	"description": "A PostCSS plugin and Node tool for converting px to rem or vw, suitable for CSS, JS, Vue, React and other scenarios.",
 	"keywords": [
 		"postcss",

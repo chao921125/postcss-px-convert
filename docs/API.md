@@ -195,6 +195,7 @@ interface Px2AnyOptions {
   customPxReplace?: (px: number, converted: string, unit: string) => string;
   injectFlexibleScript?: boolean;
   flexibleScriptPath?: string;
+  unitMap?: UnitMap;  // 属性单位映射（支持混合单位）
 }
 ```
 
