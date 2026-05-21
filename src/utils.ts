@@ -92,4 +92,58 @@ export function createPxReplace(options: any, isLandscape = false) {
     }
     return result;
   };
+}
+
+/**
+ * 根据属性名获取应该使用的转换单位
+ * @param prop CSS 属性名
+ * @param unitMap 单位映射配置
+ * @param defaultUnit 默认单位
+ * @returns 转换单位
+ */
+export function getUnitForProperty(prop: string, unitMap: any, defaultUnit: string): string {
+  if (!unitMap || Object.keys(unitMap).length === 0) {
+    return defaultUnit;
+  }
+
+  // 精确匹配
+  if (unitMap[prop]) {
+    return unitMap[prop];
+  }
+
+  // 通配符匹配
+  for (const pattern in unitMap) {
+    if (pattern.endsWith('*') && !pattern.startsWith('*')) {
+      // font-* 匹配 font-size, font-weight 等
+      const prefix = pattern.slice(0, -1);
+      if (prop.startsWith(prefix)) {
+        return unitMap[pattern];
+      }
+    } else if (pattern.startsWith('*') && !pattern.endsWith('*')) {
+      // *size 匹配 font-size, icon-size 等
+      const suffix = pattern.slice(1);
+      if (prop.endsWith(suffix)) {
+        return unitMap[pattern];
+      }
+    } else if (pattern.includes('*')) {
+      // margin* 匹配 margin, margin-top, margin-bottom 等
+      const prefix = pattern.slice(0, -1);
+      if (prop === prefix || prop.startsWith(prefix + '-')) {
+        return unitMap[pattern];
+      }
+    }
+  }
+
+  return defaultUnit;
+}
+
+/**
+ * 解析 CSS 值中的内联单位注释
+ * 例如: /* px-convert:vw * / width: 375px;
+ * @param line CSS 行内容
+ * @returns 指定的单位或 null
+ */
+export function parseInlineUnitComment(line: string): string | null {
+  const match = line.match(/\/\*\s*px-convert\s*:\s*(rem|vw)\s*\*\//i);
+  return match ? match[1] : null;
 } 

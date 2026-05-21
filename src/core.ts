@@ -2,8 +2,8 @@
  * 核心转换逻辑
  */
 
-import { Px2AnyOptions } from './types';
-import { createPxReplace, isSelectorBlacklisted, isPropIncluded } from './utils';
+import { Px2AnyOptions, UnitToConvert } from './types';
+import { createPxReplace, isSelectorBlacklisted, isPropIncluded, getUnitForProperty, parseInlineUnitComment } from './utils';
 
 const defaultOptions: Required<Px2AnyOptions> = {
   unitToConvert: 'rem',
@@ -23,6 +23,7 @@ const defaultOptions: Required<Px2AnyOptions> = {
   customPxReplace: (px, converted, unit) => converted,
   injectFlexibleScript: false,
   flexibleScriptPath: '',
+  unitMap: {},
 };
 
 /**
@@ -54,8 +55,23 @@ export function px2any(css: string, userOptions: Px2AnyOptions): string {
   
   let lines = css.split(/(?<=;|\{|\})/);
   let skip = false;
+  let currentInlineUnit: string | null = null; // 内联注释指定的单位
+  let inRuleBlock = false; // 是否在规则块内
   
   lines = lines.map(line => {
+    // 检查是否是选择器开始（进入新规则块）
+    if (line.trim().endsWith('{')) {
+      inRuleBlock = true;
+      currentInlineUnit = null; // 进入新规则块时重置内联单位
+    }
+    
+    // 检查是否是块结束
+    if (line.trim() === '}' || line.trim().endsWith('}')) {
+      inRuleBlock = false;
+      currentInlineUnit = null; // 离开规则块时重置内联单位
+    }
+    
+    // 检查忽略注释
     if (ignoreReg.test(line)) {
       skip = true;
       return line;
@@ -65,14 +81,48 @@ export function px2any(css: string, userOptions: Px2AnyOptions): string {
       return line;
     }
     
+    // 检查内联单位注释 /* px-convert:vw */ 或 /* px-convert:rem */
+    const inlineUnit = parseInlineUnitComment(line);
+    if (inlineUnit) {
+      currentInlineUnit = inlineUnit;
+    }
+    
     // propList 只转换指定属性
     if (options.propList && options.propList.length && !options.propList.includes('*')) {
       // 只处理 propList 中的属性
       return line.replace(/([\w-]+)\s*:\s*((?:\d*\.?\d+)px)/g, (m, prop, px) => {
         if (isPropIncluded(prop, options.propList!)) {
+          // 根据优先级确定单位：内联注释 > unitMap > 默认单位
+          const unit = (currentInlineUnit || getUnitForProperty(prop, options.unitMap, options.unitToConvert)) as UnitToConvert;
+          
+          // 如果单位与默认不同，需要创建临时的替换函数
+          if (unit !== options.unitToConvert) {
+            const tempOptions: Px2AnyOptions = { ...options, unitToConvert: unit };
+            const tempPxReplace = createPxReplace(tempOptions, false);
+            return `${prop}: ${px.replace(/(\d*\.?\d+)px/g, tempPxReplace)}`;
+          }
+          
           return `${prop}: ${px.replace(/(\d*\.?\d+)px/g, pxReplace)}`;
         }
         return m;
+      });
+    }
+    
+    // 处理所有 px 值（当 propList 为 ['*'] 时）
+    if (options.unitMap && Object.keys(options.unitMap).length > 0 || currentInlineUnit) {
+      // 需要逐行解析属性来确定单位
+      return line.replace(/([\w-]+)\s*:\s*((?:\d*\.?\d+)px)/g, (m, prop, px) => {
+        // 根据优先级确定单位：内联注释 > unitMap > 默认单位
+        const unit = (currentInlineUnit || getUnitForProperty(prop, options.unitMap, options.unitToConvert)) as UnitToConvert;
+        
+        // 如果单位与默认不同，需要创建临时的替换函数
+        if (unit !== options.unitToConvert) {
+          const tempOptions: Px2AnyOptions = { ...options, unitToConvert: unit };
+          const tempPxReplace = createPxReplace(tempOptions, false);
+          return `${prop}: ${px.replace(/(\d*\.?\d+)px/g, tempPxReplace)}`;
+        }
+        
+        return `${prop}: ${px.replace(/(\d*\.?\d+)px/g, pxReplace)}`;
       });
     }
     
@@ -92,7 +142,27 @@ export function px2anyPostcss(root: any, options: Px2AnyOptions) {
     if (isSelectorBlacklisted(rule.selector, options.selectorBlackList || [])) return;
     rule.walkDecls((decl: any) => {
       if (!isPropIncluded(decl.prop, options.propList || ['*'])) return;
-      decl.value = px2any(decl.value, options);
+      
+      // 根据 unitMap 确定该属性的转换单位
+      const unit = getUnitForProperty(decl.prop, options.unitMap, options.unitToConvert || 'rem') as UnitToConvert;
+      
+      // 如果单位与默认不同，创建临时配置
+      if (unit !== options.unitToConvert) {
+        // 关键修复：不使用 unitMap，直接指定 unitToConvert
+        const tempOptions: Px2AnyOptions = { 
+          ...options, 
+          unitToConvert: unit,
+          unitMap: {}  // 清空 unitMap，避免 px2any 尝试解析属性名
+        };
+        decl.value = px2any(decl.value, tempOptions);
+      } else {
+        // 也清空 unitMap，提高性能
+        const defaultOptions: Px2AnyOptions = {
+          ...options,
+          unitMap: {}
+        };
+        decl.value = px2any(decl.value, defaultOptions);
+      }
     });
   });
   

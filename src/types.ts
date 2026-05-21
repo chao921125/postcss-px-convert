@@ -1,5 +1,14 @@
 export type UnitToConvert = 'rem' | 'vw';
 
+/**
+ * 属性单位映射配置
+ * 键：CSS 属性名（支持通配符）
+ * 值：转换单位 'rem' | 'vw'
+ */
+export interface UnitMap {
+  [propertyName: string]: UnitToConvert;
+}
+
 export interface Px2AnyOptions {
   unitToConvert: UnitToConvert; // 转换目标单位 rem 或 vw
   rootValue?: number;           // rem 基准值，默认 16
@@ -18,6 +27,7 @@ export interface Px2AnyOptions {
   customPxReplace?: (px: number, converted: string, unit: UnitToConvert) => string; // 自定义转换函数
   injectFlexibleScript?: boolean; // 是否自动生成 flexible.js
   flexibleScriptPath?: string;  // flexible.js 输出路径
+  unitMap?: UnitMap;            // 属性级别单位映射配置（新增）
 }
 
 export interface PostcssPxConvertOptions extends Px2AnyOptions {}
